@@ -1,0 +1,8 @@
+# add these to your own toml-file
+
+[Connection_Details]
+
+	db_host =  'localhost'
+	db_name = 'testdatabase'
+	db_username = 'root'
+	db_password = ''

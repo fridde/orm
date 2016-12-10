@@ -1,0 +1,19 @@
+{
+    "name": "fridde/orm",
+    "description": "A simple wrapper for Doctrines data wrapper. A wrapper wrapper!",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "fridde",
+            "email": "f@hehl.se"
+        }
+    ],
+    "require": {
+        "php": ">=7.0.0",
+        "doctrine/orm": "^3.2"
+    },
+    "autoload": {
+        "psr-4": { "Fridde\\": "src/" }
+    },
+    "minimum-stability": "dev"
+}
