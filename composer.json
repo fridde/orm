@@ -1,6 +1,6 @@
 {
     "name": "fridde/orm",
-    "description": "A simple wrapper for Doctrines data wrapper. A wrapper wrapper!",
+    "description": "A simple wrapper for Doctrine's data wrapper. A wrapper wrapper!",
     "license": "MIT",
     "authors": [
         {
@@ -10,7 +10,7 @@
     ],
     "require": {
         "php": ">=7.0.0",
-        "doctrine/orm": "^3.2"
+        "doctrine/orm": "*"
     },
     "autoload": {
         "psr-4": { "Fridde\\": "src/" }
