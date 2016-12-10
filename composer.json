@@ -10,7 +10,7 @@
     ],
     "require": {
         "php": ">=7.0.0",
-        "doctrine/orm": "*"
+        "doctrine/orm": "^2.5"
     },
     "autoload": {
         "psr-4": { "Fridde\\": "src/" }
