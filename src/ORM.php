@@ -7,7 +7,7 @@ use \Doctrine\ORM\EntityManager;
 
 class ORM {
 
-    public $path_to_entities = "src/Entities/";
+    public $paths_to_entities = ["src/Entities/"];
     private $EM;
 
     public function __construct($settings = null)
@@ -23,7 +23,7 @@ class ORM {
                 'dbname'   => $db_settings['db_name']
             ];
 
-            $config = Setup::createAnnotationMetadataConfiguration($this->path_to_entities, $is_dev_mode);
+            $config = Setup::createAnnotationMetadataConfiguration($this->paths_to_entities, $is_dev_mode);
             $this->EM = EntityManager::create($db_params, $config);
         } else {
             throw new \Exception("No database settings found.");
