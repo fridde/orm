@@ -9,7 +9,7 @@ class ORM {
 
     public $paths_to_entities = ["src/Entities/"];
     private $default_namespace;
-    private $EM;
+    public $EM;
 
     public function __construct($db_settings = null, $orm_settings = null)
     {
@@ -46,10 +46,32 @@ class ORM {
     }
 
     public function getRepository($entityName){
-        if(!class_exists($entityName) && !empty($this->default_namespace)){
-            class_alias($this->default_namespace . '\\' . $entityName, $entityName);
-        }
+
+        $this->qualifyClassname($entityName, true);
         return $this->EM->getRepository($entityName);
+    }
+
+    public function qualifyClassname($class_names, $set_alias = false)
+    {
+        $full_names = [];
+        $class_names = (array) $class_names;
+        foreach($class_names as $class_name){
+            $full_name = $class_name;
+            if(!class_exists($class_name) && !empty($this->default_namespace)){
+                $full_name = $this->default_namespace . '\\' . $class_name;
+                if($set_alias){
+                    class_alias($full_name, $class_name);
+                }
+            }
+            $full_names[] = $full_name;
+        }
+        return count($full_names) > 1 ? $full_names : reset($full_names);
+    }
+
+
+    public function find($entityName, $id)
+    {
+        return $this->getRepository($entityName)->find($id);
     }
 
     public static function dump($var = null, $return = false)
