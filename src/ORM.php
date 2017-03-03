@@ -2,8 +2,9 @@
 
 namespace Fridde;
 
-use \Doctrine\ORM\Tools\Setup;
-use \Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Tools\Setup;
+use Doctrine\ORM\EntityManager;
+use Doctrine\Common\Util\Debug;
 
 class ORM {
 
@@ -14,8 +15,8 @@ class ORM {
     public function __construct($db_settings = null, $orm_settings = null)
     {
         $is_dev_mode = $GLOBALS["debug"] ?? false;
-        $db_settings = $db_settings ?? ($GLOBALS["SETTINGS"]["Connection_Details"] ?? []);
-        $orm_settings = $orm_settings ?? ($GLOBALS["SETTINGS"]["ORM"] ?? []);
+        $db_settings = $db_settings ?? (SETTINGS["Connection_Details"] ?? []);
+        $orm_settings = $orm_settings ?? (SETTINGS["ORM"] ?? []);
 
         if(!empty($db_settings)){
             $db_params = [
@@ -77,9 +78,9 @@ class ORM {
     public static function dump($var = null, $return = false)
     {
         if($return) {
-            return \Doctrine\Common\Util\Debug::export($var);
+            return Debug::export($var);
         } else {
-            \Doctrine\Common\Util\Debug::dump($var);
+            Debug::dump($var);
         }
 
     }
