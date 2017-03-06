@@ -46,10 +46,10 @@ class ORM {
         return $this->EM;
     }
 
-    public function getRepository($entityName){
+    public function getRepository($entity_class){
 
-        $this->qualifyClassname($entityName, true);
-        return $this->EM->getRepository($entityName);
+        $this->qualifyClassname($entity_class, true);
+        return $this->EM->getRepository($entity_class);
     }
 
     public function qualifyClassname($class_names, $set_alias = false)
@@ -70,9 +70,14 @@ class ORM {
     }
 
 
-    public function find($entityName, $id)
+    public function find($entity_class, $id)
     {
-        return $this->getRepository($entityName)->find($id);
+        return $this->getRepository($entity_class)->find($id);
+    }
+
+    public function findBy($entity_class, $criteria = [])
+    {
+        return $this->getRepository($entity_class)->findBy($criteria);
     }
 
     public static function dump($var = null, $return = false)
