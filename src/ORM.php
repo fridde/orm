@@ -12,26 +12,26 @@ class ORM {
     private $default_namespace;
     public $EM;
 
-    public function __construct($db_settings = null, $orm_settings = null)
+    public function __construct(array $db_settings = null, array $orm_settings = null)
     {
-        $is_dev_mode = $GLOBALS["debug"] ?? false;
         $db_settings = $db_settings ?? (SETTINGS["Connection_Details"] ?? []);
         $orm_settings = $orm_settings ?? (SETTINGS["ORM"] ?? []);
 
-        if(!empty($db_settings)){
-            $db_params = [
-                'driver'   => 'pdo_mysql',
-                'user'     => $db_settings["db_username"],
-                'password' => $db_settings['db_password'],
-                'dbname'   => $db_settings['db_name'],
-                'charset'  => 'utf8'
-            ];
-
-            $config = Setup::createAnnotationMetadataConfiguration($this->paths_to_entities, $is_dev_mode);
-            $this->EM = EntityManager::create($db_params, $config);
-        } else {
+        if(empty($db_settings)){
             throw new \Exception("No database settings found.");
         }
+        $db_params = [
+            'driver'   => 'pdo_mysql',
+            'user'     => $db_settings["db_username"],
+            'password' => $db_settings['db_password'],
+            'dbname'   => $db_settings['db_name'],
+            'charset'  => 'utf8'
+        ];
+
+        $is_dev_mode = $GLOBALS["debug"] ?? false;
+        $config = Setup::createAnnotationMetadataConfiguration($this->paths_to_entities, $is_dev_mode);
+        $this->EM = EntityManager::create($db_params, $config);
+
         $this->default_namespace = $orm_settings["default_namespace"] ?? null;
     }
 
@@ -83,11 +83,54 @@ class ORM {
     public static function dump($var = null, $return = false)
     {
         if($return) {
-            return Debug::export($var);
+            return Debug::export($var, false);
         } else {
             Debug::dump($var);
         }
 
+    }
+
+    /**
+     * @param string $entity_class
+     * @param int|string $entity_id
+     * @param string $property The name of the property that is supposed to be updated
+     * @param mixed $value
+     */
+    public function updateProperty(string $entity_class, $entity_id, string $property, $value)
+    {
+        $entity = $this->getRepository($entity_class)->find($entity_id);
+        if(empty($entity)){
+            throw new ExceptionalException(':no_entity:', [$entity_class, $entity_id]);
+        }
+
+        $setter = "set" . $property;
+
+        if (!method_exists($entity, $setter)) {
+            throw new \Exception("The method <" . $setter . 'does not exist for the entity of class <' . $entity_class . '>.');
+        }
+        $entity->$setter($value);
+        $this->EM->persist($entity);
+    }
+
+    public function batchUpdateProperties(array $updates)
+    {
+
+        foreach($updates as $update){
+            call_user_func_array([$this, "updateProperty"], $update);
+        }
+    }
+
+    public function createNewEntity(string $entity_class, array $properties = [])
+    {
+        $full_class_name = $this->qualifyClassname($entity_class);
+        $entity = new $full_class_name();
+
+        foreach($properties as $property => $value){
+            $method_name = "set" . ucfirst($property);
+            $entity->$method_name($value);
+        }
+        $this->EM->persist($entity);
+        return $entity;
     }
 
 }
