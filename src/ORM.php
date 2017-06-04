@@ -46,8 +46,12 @@ class ORM {
         return $this->EM;
     }
 
-    public function getRepository($entity_class){
-
+    /**
+     * @param string $entity_class
+     * @return \Fridde\CustomRepository
+     */
+    public function getRepository(string $entity_class)
+    {
         $this->qualifyClassname($entity_class, true);
         return $this->EM->getRepository($entity_class);
     }
