@@ -15,7 +15,7 @@ use Carbon\Carbon;
  */
 class DefaultUpdate
 {
-    /* @var $ORM \Fridde\Naturskolan */
+    /* @var $ORM  */
     protected $ORM;
     /** @var array The request data sent into the constructor */
     protected $RQ;

@@ -22,6 +22,7 @@ class ORM {
         }
         $db_params = [
             'driver'   => 'pdo_mysql',
+            'host'     => $db_settings['db_host'],
             'user'     => $db_settings["db_username"],
             'password' => $db_settings['db_password'],
             'dbname'   => $db_settings['db_name'],
