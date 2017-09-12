@@ -42,6 +42,12 @@ class ORM {
         $this->EM->flush();
     }
 
+    public function delete($entity)
+    {
+        $this->EM->remove($entity);
+        $this->EM->flush();
+    }
+
     public function getEM()
     {
         return $this->EM;

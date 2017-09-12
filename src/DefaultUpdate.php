@@ -43,11 +43,6 @@ class DefaultUpdate
         $this->RQ = $request_data;
     }
 
-    public static function create()
-    {
-        // TODO: remove after correction of other methods
-    }
-
     /**
      * @param string $entity_class
      * @param int|string $entity_id
@@ -82,7 +77,7 @@ class DefaultUpdate
 
         $syncables = $this->syncables ?? [];
 
-        $model_entity = $this->N->ORM->getRepository($entity_class)->find($model_entity_id);
+        $model_entity = $this->ORM->getRepository($entity_class)->find($model_entity_id);
         $properties = [$property => $value];
 
         $properties_to_sync = $syncables[$entity_class] ?? [];
@@ -94,12 +89,19 @@ class DefaultUpdate
         return $this->createNewEntity($entity_class, $properties);
     }
 
-    public function createNewEntity(string $entity_class, array $properties = [])
+    /**
+     * @param string $entity_class
+     * @param array $properties
+     * @param bool $flush
+     * @return $this
+     */
+    public function createNewEntity(string $entity_class, array $properties = [], bool $flush = true)
     {
-
         $properties = $this->replaceIdsWithObjects($entity_class, $properties);
-        $entity = $this->N->ORM->createNewEntity($entity_class, $properties);
-        $this->N->ORM->EM->flush();
+        $entity = $this->ORM->createNewEntity($entity_class, $properties);
+        if ($flush) {
+            $this->ORM->EM->flush();
+        }
         $this->setReturn("new_id", $entity->getId());
 
         return $this;
@@ -228,7 +230,7 @@ class DefaultUpdate
      * @param  integer|string $id The id of the entity to look for.
      * @return object|null The entity or null if no entity was found.
      */
-    private function findById(string $entity_class, $id)
+    protected function findById(string $entity_class, $id)
     {
         return $this->ORM->getRepository($entity_class)->find($id);
     }

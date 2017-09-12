@@ -161,7 +161,7 @@ class CustomRepository extends EntityRepository
                 } else {
                     $method_result = $entity->$method_name();
                 }
-                $test_results[] = $this->applyLogicalOperator($operator, $result, $value);
+                $test_results[] = $this->applyLogicalOperator($operator, $method_result, $value);
             }
             $nr_of_trues = count(array_filter($test_results));
             $total_operator = strtolower($total_operator);
