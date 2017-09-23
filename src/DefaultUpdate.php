@@ -74,7 +74,6 @@ class DefaultUpdate
 
     public function createNewEntityFromModel(string $entity_class, string $property, $value, $model_entity_id)
     {
-
         $syncables = $this->syncables ?? [];
 
         $model_entity = $this->ORM->getRepository($entity_class)->find($model_entity_id);
@@ -85,7 +84,7 @@ class DefaultUpdate
             $method_name = "get".$property_name;
             $properties[$property_name] = $model_entity->$method_name;
         }
-
+        $this->setReturn("old_id", $model_entity_id);
         return $this->createNewEntity($entity_class, $properties);
     }
 
