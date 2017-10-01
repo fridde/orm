@@ -120,7 +120,7 @@ class ORM {
             throw new \Exception("The method <" . $setter . 'does not exist for the entity of class <' . $entity_class . '>.');
         }
         $entity->$setter($value);
-        $this->EM->persist($entity);
+        //$this->EM->persist($entity);
     }
 
     public function batchUpdateProperties(array $updates)
