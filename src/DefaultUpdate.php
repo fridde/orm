@@ -15,7 +15,7 @@ use Carbon\Carbon;
  */
 class DefaultUpdate
 {
-    /* @var $ORM  */
+    /* @var $ORM */
     protected $ORM;
     /** @var array The request data sent into the constructor */
     protected $RQ;
@@ -35,9 +35,9 @@ class DefaultUpdate
     /**
      * Update constructor.
      * @param array $request_data
-     * @param \Fridde\ORM $ORM
+     * @param ORM $ORM
      */
-    public function __construct(array $request_data = [], \Fridde\ORM $ORM)
+    public function __construct(array $request_data = [], ORM $ORM)
     {
         $this->ORM = $ORM;
         $this->RQ = $request_data;
@@ -53,7 +53,6 @@ class DefaultUpdate
     {
         $value = $this->replaceIdWithObject($entity_class, $property, $value);
         $this->ORM->updateProperty($entity_class, $entity_id, $property, $value);
-        $this->ORM->EM->flush();
 
         return $this;
     }
@@ -85,6 +84,7 @@ class DefaultUpdate
             $properties[$property_name] = $model_entity->$method_name;
         }
         $this->setReturn("old_id", $model_entity_id);
+
         return $this->createNewEntity($entity_class, $properties);
     }
 
@@ -94,15 +94,18 @@ class DefaultUpdate
      * @param bool $flush
      * @return $this
      */
-    public function createNewEntity(string $entity_class, array $properties = [], bool $flush = true)
+    public function createNewEntity(string $entity_class, array $properties = [])
     {
         $properties = $this->replaceIdsWithObjects($entity_class, $properties);
         $entity = $this->ORM->createNewEntity($entity_class, $properties);
-        if ($flush) {
-            $this->ORM->EM->flush();
-        }
         $this->setReturn("new_id", $entity->getId());
 
+        return $this;
+    }
+
+    public function flush()
+    {
+        $this->ORM->EM->flush();
         return $this;
     }
 
@@ -121,6 +124,7 @@ class DefaultUpdate
         if (in_array($property_name, $replacements) && !is_object($value)) {
             return $this->findById($property_name, $value);
         }
+
         return $value;
     }
 
@@ -149,7 +153,7 @@ class DefaultUpdate
     public function getReturn($key = null)
     {
         if (empty($key)) {
-            $this->setReturn("onReturn");
+            $this->setReturn("onReturn", $this->RQ['onReturn']);
             $this->setReturn("success", !$this->hasErrors());
             $this->setReturn("errors", $this->getErrors());
 
@@ -171,8 +175,10 @@ class DefaultUpdate
     {
         if (is_string($key)) {
             $key_value_pairs = [$key => $value];
-        } else {
+        } elseif (is_array($key)) {
             $key_value_pairs = $key;
+        } else {
+            throw new \Exception('Argument must be either string or array');
         }
         foreach ($key_value_pairs as $key => $value) {
             $this->Return[$key] = $value;

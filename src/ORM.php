@@ -2,6 +2,7 @@
 
 namespace Fridde;
 
+use Doctrine\Common\EventManager;
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
 use Doctrine\Common\Util\Debug;
@@ -31,7 +32,7 @@ class ORM {
 
         $is_dev_mode = $GLOBALS["debug"] ?? false;
         $config = Setup::createAnnotationMetadataConfiguration($this->paths_to_entities, $is_dev_mode);
-        $this->EM = EntityManager::create($db_params, $config);
+        $this->EM = EntityManager::create($db_params, $config, new EventManager());
 
         $this->default_namespace = $orm_settings["default_namespace"] ?? null;
     }
@@ -54,8 +55,7 @@ class ORM {
     }
 
     /**
-     * @param string $entity_class
-     * @return \Fridde\CustomRepository
+     * @param string $entity_class     *
      */
     public function getRepository(string $entity_class)
     {
@@ -120,7 +120,6 @@ class ORM {
             throw new \Exception("The method <" . $setter . 'does not exist for the entity of class <' . $entity_class . '>.');
         }
         $entity->$setter($value);
-        //$this->EM->persist($entity);
     }
 
     public function batchUpdateProperties(array $updates)
