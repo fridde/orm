@@ -66,7 +66,6 @@ class DefaultUpdate
             }
             call_user_func_array([$this->ORM, "updateProperty"], array_values($update_args));
         }
-        $this->ORM->EM->flush();
 
         return $this;
     }
@@ -98,6 +97,7 @@ class DefaultUpdate
     {
         $properties = $this->replaceIdsWithObjects($entity_class, $properties);
         $entity = $this->ORM->createNewEntity($entity_class, $properties);
+        $this->flush();
         $this->setReturn("new_id", $entity->getId());
 
         return $this;
