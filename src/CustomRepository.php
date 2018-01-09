@@ -53,7 +53,7 @@ class CustomRepository extends EntityRepository
     protected function selectAndOr($type, ...$expression_args): array
     {
 
-        $type = $type."X";
+        $type .= 'X';
 
         $args = $this->normalizeArgs($expression_args[0]);
         if (empty($args)) {

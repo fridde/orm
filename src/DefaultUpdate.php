@@ -15,9 +15,9 @@ use Carbon\Carbon;
  */
 class DefaultUpdate
 {
-    /* @var $ORM */
+    /* @var ORM $ORM */
     protected $ORM;
-    /** @var array The request data sent into the constructor */
+    /** @var array $RQ The request data sent into the constructor */
     protected $RQ;
     /** @var array */
     protected $Return = [];
@@ -41,6 +41,7 @@ class DefaultUpdate
     {
         $this->ORM = $ORM;
         $this->RQ = $request_data;
+        $this->Return = $request_data['return'] ?? [];
     }
 
     /**
@@ -70,22 +71,6 @@ class DefaultUpdate
         return $this;
     }
 
-    public function createNewEntityFromModel(string $entity_class, string $property, $value, $model_entity_id)
-    {
-        $syncables = $this->syncables ?? [];
-
-        $model_entity = $this->ORM->getRepository($entity_class)->find($model_entity_id);
-        $properties = [$property => $value];
-
-        $properties_to_sync = $syncables[$entity_class] ?? [];
-        foreach ($properties_to_sync as $property_name) {
-            $method_name = "get".$property_name;
-            $properties[$property_name] = $model_entity->$method_name;
-        }
-        $this->setReturn("old_id", $model_entity_id);
-
-        return $this->createNewEntity($entity_class, $properties);
-    }
 
     /**
      * @param string $entity_class
@@ -93,19 +78,59 @@ class DefaultUpdate
      * @param bool $flush
      * @return $this
      */
-    public function createNewEntity(string $entity_class, array $properties = [])
+    public function createNewEntity(string $entity_class, array $properties = [], bool $flush = true)
     {
+        //debug_allRequiredFieldsGiven
+        if (!$this->debug_allRequiredFieldsGiven($entity_class, $properties)) {
+            //if(!$this->allRequiredFieldsGiven($entity_class, $properties)){
+            $this->setReturn("old_properties", $properties);
+
+            return $this;
+        }
         $properties = $this->replaceIdsWithObjects($entity_class, $properties);
         $entity = $this->ORM->createNewEntity($entity_class, $properties);
-        $this->flush();
+        if ($flush) {
+            $this->flush();
+        }
         $this->setReturn("new_id", $entity->getId());
 
         return $this;
     }
 
+
+    private function allRequiredFieldsGiven(string $entity_class, array $properties)
+    {
+        return 0 === count(
+                array_diff(
+                    $this->ORM->getRequiredFields($entity_class),
+                    array_keys(
+                        array_filter($properties, 'is_null')
+                    )
+                )
+            );
+    }
+
+    private function debug_allRequiredFieldsGiven(string $entity_class, array $properties)
+    {
+        $filtered_properties = array_filter(
+            $properties,
+            function ($p) {
+                return !is_null($p);
+            }
+        );
+        $keys = array_keys($filtered_properties);
+        $required_fields = $this->ORM->getRequiredFields($entity_class);
+        $diff = array_diff($required_fields, $keys);
+        $not_defined = count($diff);
+
+        return $not_defined === 0;
+    }
+
+
     public function flush()
     {
         $this->ORM->EM->flush();
+
         return $this;
     }
 
@@ -122,7 +147,7 @@ class DefaultUpdate
     {
         $replacements = $this->object_required[$entity_class] ?? [];
         if (in_array($property_name, $replacements) && !is_object($value)) {
-            return $this->findById($property_name, $value);
+            $value = $this->ORM->EM->getReference($property_name, $value);
         }
 
         return $value;
@@ -153,7 +178,7 @@ class DefaultUpdate
     public function getReturn($key = null)
     {
         if (empty($key)) {
-            $this->setReturn("onReturn", $this->RQ['onReturn']);
+            $this->setReturn("onReturn", $this->RQ['onReturn'] ?? null);
             $this->setReturn("success", !$this->hasErrors());
             $this->setReturn("errors", $this->getErrors());
 
