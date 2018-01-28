@@ -147,6 +147,7 @@ class DefaultUpdate
     {
         $replacements = $this->object_required[$entity_class] ?? [];
         if (in_array($property_name, $replacements) && !is_object($value)) {
+            $property_name = $this->ORM->qualifyEntityClassname($property_name);
             $value = $this->ORM->EM->getReference($property_name, $value);
         }
 
