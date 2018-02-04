@@ -12,7 +12,7 @@ use Doctrine\Common\Util\Debug;
 class ORM
 {
 
-    public $paths_to_entities = ["src/Entities/"];
+    public $paths_to_entities = [BASE_DIR . 'src/Entities/'];
     private $entity_to_class_mapping;
     private $entity_column_data;
     /* @var ClassMetadata[] $entity_meta_data */
