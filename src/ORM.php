@@ -38,6 +38,7 @@ class ORM
 
         $is_dev_mode = $GLOBALS["debug"] ?? false;
         $config = Setup::createAnnotationMetadataConfiguration($this->paths_to_entities, $is_dev_mode);
+        $config->setAutoGenerateProxyClasses(true);
         $this->EM = EntityManager::create($db_params, $config, new EventManager());
 
     }
