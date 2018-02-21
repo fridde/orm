@@ -26,10 +26,10 @@ class DefaultUpdate
 
     /* @var array */
     const DEFAULT_METHOD_ARGUMENTS = [
-        "updateProperty" => ["entity_class", "entity_id", "property", "value"],
-        "batchUpdateProperties" => ["array_of_updates"],
-        "createNewEntity" => ["entity_class", "properties"],
-        "createNewEntityFromModel" => ["entity_class", "property", "value", "model_entity_id"],
+        'updateProperty' => ['entity_class', 'entity_id', 'property', 'value'],
+        'batchUpdateProperties' => ['array_of_updates'],
+        'createNewEntity' => ['entity_class', 'properties'],
+        'createNewEntityFromModel' => ['entity_class', 'property', 'value', 'model_entity_id'],
     ];
 
     /**
@@ -62,10 +62,10 @@ class DefaultUpdate
     {
         // array of entity_class, entity_id, property, value
         foreach ($array_of_updates as $update_args) {
-            if (count(array_filter(array_keys($update_args), "is_string")) > 0) {
-                $update_args = U::pluck($update_args, self::getMethodArgs("updateProperty"));
+            if (count(array_filter(array_keys($update_args), 'is_string')) > 0) {
+                $update_args = U::pluck($update_args, self::getMethodArgs('updateProperty'));
             }
-            call_user_func_array([$this->ORM, "updateProperty"], array_values($update_args));
+            call_user_func_array([$this->ORM, 'updateProperty'], array_values($update_args));
         }
 
         return $this;
@@ -83,7 +83,7 @@ class DefaultUpdate
         //debug_allRequiredFieldsGiven
         if (!$this->debug_allRequiredFieldsGiven($entity_class, $properties)) {
             //if(!$this->allRequiredFieldsGiven($entity_class, $properties)){
-            $this->setReturn("old_properties", $properties);
+            $this->setReturn('old_properties', $properties);
 
             return $this;
         }
@@ -92,7 +92,7 @@ class DefaultUpdate
         if ($flush) {
             $this->flush();
         }
-        $this->setReturn("new_id", $entity->getId());
+        $this->setReturn('new_id', $entity->getId());
 
         return $this;
     }
@@ -145,7 +145,7 @@ class DefaultUpdate
 
     protected function replaceIdWithObject(string $entity_class, string $property_name, $value)
     {
-        $replacements = $this->object_required[$entity_class] ?? [];
+        $replacements = self::object_required[$entity_class] ?? [];
         if (in_array($property_name, $replacements) && !is_object($value)) {
             $property_name = $this->ORM->qualifyEntityClassname($property_name);
             $value = $this->ORM->EM->getReference($property_name, $value);
@@ -173,15 +173,15 @@ class DefaultUpdate
      *
      * @param  string|null $key If specified, only the value of $Return[$key] is returned.
      * @return array|mixed If no key was specified, the whole $Return is returned.
-     *                     It contains ["onReturn" => "...", "success" => true|false,
-     *                     "errors" => [...]]
+     *                     It contains ['onReturn' => '...', 'success' => true|false,
+     *                     'errors' => [...]]
      */
     public function getReturn($key = null)
     {
         if (empty($key)) {
-            $this->setReturn("onReturn", $this->RQ['onReturn'] ?? null);
-            $this->setReturn("success", !$this->hasErrors());
-            $this->setReturn("errors", $this->getErrors());
+            $this->setReturn('onReturn', $this->RQ['onReturn'] ?? null);
+            $this->setReturn('success', !$this->hasErrors());
+            $this->setReturn('errors', $this->getErrors());
 
             return $this->Return;
         }
