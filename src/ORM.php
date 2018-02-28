@@ -21,22 +21,22 @@ class ORM
 
     public function __construct(array $db_settings = null, array $orm_settings = null)
     {
-        $db_settings = $db_settings ?? (SETTINGS["Connection_Details"] ?? []);
-        $orm_settings = $orm_settings ?? (SETTINGS["ORM"] ?? []);
+        $db_settings = $db_settings ?? (SETTINGS['Connection_Details'] ?? []);
+        $orm_settings = $orm_settings ?? (SETTINGS['ORM'] ?? []);
 
         if (empty($db_settings)) {
-            throw new \Exception("No database settings found.");
+            throw new \Exception('No database settings found.');
         }
         $db_params = [
             'driver' => 'pdo_mysql',
             'host' => $db_settings['db_host'],
-            'user' => $db_settings["db_username"],
+            'user' => $db_settings['db_username'],
             'password' => $db_settings['db_password'],
             'dbname' => $db_settings['db_name'],
             'charset' => 'utf8',
         ];
 
-        $is_dev_mode = $GLOBALS["debug"] ?? false;
+        $is_dev_mode = $GLOBALS['debug'] ?? false;
         $config = Setup::createAnnotationMetadataConfiguration($this->paths_to_entities, $is_dev_mode);
         $config->setAutoGenerateProxyClasses(true);
         $this->EM = EntityManager::create($db_params, $config, new EventManager());
@@ -110,10 +110,10 @@ class ORM
             throw new ExceptionalException(':no_entity:', [$entity_class, $entity_id]);
         }
 
-        $setter = "set".$property;
+        $setter = 'set'.$property;
 
         if (!method_exists($entity, $setter)) {
-            throw new \Exception("The method <".$setter.'does not exist for the entity of class <'.$entity_class.'>.');
+            throw new \Exception('The method "' .$setter.'" does not exist for the entity of class "'.$entity_class.'".');
         }
         $entity->$setter($value);
     }
@@ -122,7 +122,7 @@ class ORM
     {
 
         foreach ($updates as $update) {
-            call_user_func_array([$this, "updateProperty"], $update);
+            call_user_func_array([$this, 'updateProperty'], $update);
         }
     }
 
@@ -132,7 +132,7 @@ class ORM
         $entity = new $full_class_name();
 
         foreach ($properties as $property => $value) {
-            $method_name = "set".ucfirst($property);
+            $method_name = 'set'.ucfirst($property);
             $entity->$method_name($value);
         }
         $this->EM->persist($entity);
