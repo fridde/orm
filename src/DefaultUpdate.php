@@ -80,9 +80,8 @@ class DefaultUpdate
      */
     public function createNewEntity(string $entity_class, array $properties = [], bool $flush = true)
     {
-        //debug_allRequiredFieldsGiven
-        if (!$this->debug_allRequiredFieldsGiven($entity_class, $properties)) {
-            //if(!$this->allRequiredFieldsGiven($entity_class, $properties)){
+
+        if (!$this->allRequiredFieldsGiven($entity_class, $properties)) {
             $this->setReturn('old_properties', $properties);
 
             return $this;
@@ -110,22 +109,6 @@ class DefaultUpdate
             );
     }
 
-    private function debug_allRequiredFieldsGiven(string $entity_class, array $properties)
-    {
-        $filtered_properties = array_filter(
-            $properties,
-            function ($p) {
-                return !is_null($p);
-            }
-        );
-        $keys = array_keys($filtered_properties);
-        $required_fields = $this->ORM->getRequiredFields($entity_class);
-        $diff = array_diff($required_fields, $keys);
-        $not_defined = count($diff);
-
-        return $not_defined === 0;
-    }
-
 
     public function flush()
     {
@@ -145,7 +128,7 @@ class DefaultUpdate
 
     protected function replaceIdWithObject(string $entity_class, string $property_name, $value)
     {
-        $replacements = self::$object_required[$entity_class] ?? [];
+        $replacements = $this->object_required[$entity_class] ?? [];
         if (in_array($property_name, $replacements) && !is_object($value)) {
             $property_name = $this->ORM->qualifyEntityClassname($property_name);
             $value = $this->ORM->EM->getReference($property_name, $value);
