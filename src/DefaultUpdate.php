@@ -25,7 +25,7 @@ class DefaultUpdate
     protected $Errors = [];
 
     /* @var array */
-    const DEFAULT_METHOD_ARGUMENTS = [
+    public const DEFAULT_METHOD_ARGUMENTS = [
         'updateProperty' => ['entity_class', 'entity_id', 'property', 'value'],
         'batchUpdateProperties' => ['array_of_updates'],
         'createNewEntity' => ['entity_class', 'properties'],
@@ -145,7 +145,7 @@ class DefaultUpdate
 
     protected function replaceIdWithObject(string $entity_class, string $property_name, $value)
     {
-        $replacements = self::object_required[$entity_class] ?? [];
+        $replacements = self::$object_required[$entity_class] ?? [];
         if (in_array($property_name, $replacements) && !is_object($value)) {
             $property_name = $this->ORM->qualifyEntityClassname($property_name);
             $value = $this->ORM->EM->getReference($property_name, $value);
