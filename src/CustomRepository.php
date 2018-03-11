@@ -16,7 +16,7 @@ class CustomRepository extends EntityRepository
      */
     public function select(...$expression_args): array
     {
-        return call_user_func_array([$this, "selectAnd"], $expression_args);
+        return call_user_func_array([$this, 'selectAnd'], $expression_args);
     }
 
     /**
@@ -36,12 +36,12 @@ class CustomRepository extends EntityRepository
 
     public function selectAnd(...$expression_args): array
     {
-        return $this->selectAndOr("and", $expression_args);
+        return $this->selectAndOr('and', $expression_args);
     }
 
     public function selectOr(...$expression_args): array
     {
-        return $this->selectAndOr("or", $expression_args);
+        return $this->selectAndOr('or', $expression_args);
     }
 
     /**
@@ -67,7 +67,7 @@ class CustomRepository extends EntityRepository
             $big_expression = call_user_func_array([$big_expression, $type], $expressions);
             $criteria = Criteria::create()->where($big_expression);
         } else {
-            throw new \Exception("Wrong amount of arguments in number of expressions");
+            throw new \Exception('Wrong amount of arguments in number of expressions');
         }
 
         return $this->matching($criteria)->toArray();
@@ -90,15 +90,15 @@ class CustomRepository extends EntityRepository
         // selectAnd([])
         if (empty($args) || empty($args[0])) {
             return null;
-        } // selectAnd([["eq", "Status", 1], ["neq", "FirstName", "Bob"]])
-        elseif (count($args) === 1 && array_filter($args[0], "is_array") === $args[0]) {
+        } // selectAnd([['eq', 'Status', 1], ['neq', 'FirstName', 'Bob']])
+        elseif (count($args) === 1 && array_filter($args[0], 'is_array') === $args[0]) {
             $args = $args[0];
-        } // selectAnd("eq", "Status", 1)
-        elseif (array_filter($args, "is_array") !== $args) {
+        } // selectAnd('eq', 'Status', 1)
+        elseif (array_filter($args, 'is_array') !== $args) {
             $args = [$args];
         }
         // else
-        // selectAnd(["eq", "Status", 1])
+        // selectAnd(['eq', 'Status', 1])
         //  $args = $args
         if (empty(array_filter($args))) {
             return null;
@@ -117,13 +117,13 @@ class CustomRepository extends EntityRepository
     {
         return array_map(
             function ($arg) {
-                if (count($arg) < 3 && $arg[0] !== "isNull") {
-                    array_unshift($arg, "eq");
+                if (count($arg) < 3 && $arg[0] !== 'isNull') {
+                    array_unshift($arg, 'eq');
                 }
                 $operator = array_shift($arg);
                 $field = array_shift($arg);
                 $value = array_shift($arg);
-                if ($operator == "isNull") {
+                if ($operator === 'isNull') {
                     return Criteria::expr()->isNull($field);
                 } else {
                     return Criteria::expr()->$operator($field, $value);
@@ -144,12 +144,12 @@ class CustomRepository extends EntityRepository
      *                            as described in the docs for call_user_func_array()
      * @return array             The filtered array of entities
      */
-    public function findViaMethod(string $method_name, $value, array $parameters = [], string $operator = "eq")
+    public function findViaMethod(string $method_name, $value, array $parameters = [], string $operator = 'eq')
     {
         return $this->findViaMultipleMethods([[$method_name, $value, $parameters, $operator]]);
     }
 
-    public function findViaMultipleMethods(array $methods, $total_operator = "AND")
+    public function findViaMultipleMethods(array $methods, $total_operator = 'AND')
     {
         $filtered = [];
         foreach ($this->findAll() as $entity) {
@@ -158,7 +158,7 @@ class CustomRepository extends EntityRepository
                 $method_name = $method[0];
                 $value = $method[1];
                 $parameters = $method[2] ?? [];
-                $operator = $method[3] ?? "eq";
+                $operator = $method[3] ?? 'eq';
 
                 if (!empty($parameters)) {
                     $method_result = call_user_func_array([$entity, $method_name], $parameters);
@@ -169,9 +169,9 @@ class CustomRepository extends EntityRepository
             }
             $nr_of_trues = count(array_filter($test_results));
             $total_operator = strtolower($total_operator);
-            if ($total_operator == "and" && count($test_results) === $nr_of_trues) {
+            if ($total_operator === 'and' && count($test_results) === $nr_of_trues) {
                 $filtered[] = $entity;
-            } elseif ($total_operator == "or" && $nr_of_trues > 0) {
+            } elseif ($total_operator === 'or' && $nr_of_trues > 0) {
                 $filtered[] = $entity;
             }
         }
@@ -180,7 +180,7 @@ class CustomRepository extends EntityRepository
     }
 
     /**
-     * Applies a logical operator "between" the left value and the right value.
+     * Applies a logical operator 'between' the left value and the right value.
      *
      * @param  string $operator One of the allowed operators *eq, neq, lt, lte,
      *                             gt, gte, in, nin*
@@ -195,32 +195,32 @@ class CustomRepository extends EntityRepository
         $operator = strtolower($operator);
 
         switch ($operator) {
-            case "eq":
+            case 'eq':
                 return $l === $r;
                 break;
-            case "neq":
+            case 'neq':
                 return $l !== $r;
                 break;
-            case "lt":
+            case 'lt':
                 return $l < $r;
                 break;
-            case "lte":
+            case 'lte':
                 return $l <= $r;
                 break;
-            case "gt":
+            case 'gt':
                 return $l > $r;
                 break;
-            case "gte":
+            case 'gte':
                 return $l >= $r;
                 break;
-            case "in":
-                return in_array($l, $r);
+            case 'in':
+                return in_array($l, $r, false);
                 break;
-            case "nin":
-                return !in_array($l, $r);
+            case 'nin':
+                return !in_array($l, $r, false);
                 break;
             default:
-                throw new \Exception("The operator <".$operator."> is not defined.");
+                throw new \Exception('The operator "'.$operator.'" is not defined.');
         }
     }
 
