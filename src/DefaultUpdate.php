@@ -176,21 +176,17 @@ class DefaultUpdate
      * Sets $Return[$key]  with either a given $value or with a value taken from the
      * initial request $RQ.
      *
-     * @param string|array $key The key to set. If array each key-value pair
+     * @param mixed $key_or_array The key to set. If array each key-value pair
      *                           are the arguments for this function.
      * @param mixed|null $value The value to set at $Return[$key].
      */
-    public function setReturn($key, $value = null)
+    public function setReturn($key_or_array, $value = null)
     {
-        if (is_string($key)) {
-            $key_value_pairs = [$key => $value];
-        } elseif (is_array($key)) {
-            $key_value_pairs = $key;
-        } else {
-            throw new \Exception('Argument must be either string or array');
+        if (!is_array($key_or_array)) {
+            $key_or_array = [$key_or_array => $value];
         }
-        foreach ($key_value_pairs as $key => $value) {
-            $this->Return[$key] = $value;
+        foreach ($key_or_array as $key => $val) {
+            $this->Return[$key] = $val;
         }
 
         return $this;
