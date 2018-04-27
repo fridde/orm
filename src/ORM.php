@@ -70,7 +70,7 @@ class ORM
         return $this->EM->getRepository($entity_class);
     }
 
-    public function qualifyEntityClassname($class_name)
+    public function qualifyEntityClassname(string $class_name): ?string
     {
         $this->setEntityToClassMapping();
         return $this->getEntityToClassMapping($class_name) ?? null;
@@ -284,6 +284,48 @@ class ORM
         );
 
         $this->entity_meta_data = array_combine($keys, $meta_data);
+    }
+
+    /**
+     * Shorthand function to set a value for a certain entity in a certain repository.
+     *
+     * @param mixed $requests The function takes either 3-4 arguments corresponding to
+     *                        $repo, $id, $value and $attribute_name (with default 'Value').
+     *                        Or it takes ONE array which in itself consists of one or more
+     *                        arrays with each exactly 3-4 elements. The elements can either
+     *                        be in right order or indexed with 'repo', 'id', 'value' and 'att_name'.
+     *
+     * @return void
+     */
+    public function set(...$requests)
+    {
+        if (count($requests) === 1 && is_array($requests[0])) {
+            $requests = $requests[0];
+        } else {
+            $requests = [$requests];
+        }
+
+        foreach ($requests as $args) {
+            $repo = $args[0] ?? $args['repo'];
+            $id = $args[1] ?? $args['id'];
+            $value = $args[2] ?? $args['value'];
+            $attribute_name = $args[3] ?? ($args['att_name'] ?? 'Value');
+            $e = $this->find($repo, $id);
+            $method = 'set'.$attribute_name;
+            if (!empty($e)) {
+                $e->$method($value);
+            } else {
+                $msg = 'No entity of the class <'.$repo.'> with the id <';
+                $msg .= $id.'> could be found.';
+                throw new \Exception($msg);
+            }
+        }
+    }
+
+    public function setAndFlush(...$requests)
+    {
+        $this->set(...$requests);
+        $this->EM->flush();
     }
 
 

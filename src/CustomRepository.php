@@ -155,8 +155,7 @@ class CustomRepository extends EntityRepository
         foreach ($this->findAll() as $entity) {
             $test_results = [];
             foreach ($methods as $method) {
-                $method_name = $method[0];
-                $value = $method[1];
+                [$method_name, $value] = $method;
                 $parameters = $method[2] ?? [];
                 $operator = $method[3] ?? 'eq';
 

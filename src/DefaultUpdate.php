@@ -128,8 +128,8 @@ class DefaultUpdate
 
     protected function replaceIdWithObject(string $entity_class, string $property_name, $value)
     {
-        $replacements = $this->object_required[$entity_class] ?? [];
-        if (in_array($property_name, $replacements) && !is_object($value)) {
+        $replacements = $this->getObjectRequiredArray()[$entity_class] ?? [];
+        if (in_array($property_name, $replacements, true) && !is_object($value)) {
             $property_name = $this->ORM->qualifyEntityClassname($property_name);
             $value = $this->ORM->EM->getReference($property_name, $value);
         }
@@ -243,6 +243,11 @@ class DefaultUpdate
     protected function findById(string $entity_class, $id)
     {
         return $this->ORM->getRepository($entity_class)->find($id);
+    }
+
+    protected function getObjectRequiredArray(): array
+    {
+        return constant('self::OBJECT_REQUIRED') ?? [];
     }
 
 
