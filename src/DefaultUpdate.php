@@ -99,14 +99,14 @@ class DefaultUpdate
 
     private function allRequiredFieldsGiven(string $entity_class, array $properties)
     {
-        return 0 === count(
-                array_diff(
-                    $this->ORM->getRequiredFields($entity_class),
-                    array_keys(
-                        array_filter($properties, 'is_null')
-                    )
-                )
-            );
+        $properties = array_filter(
+            $properties,
+            function ($v) {
+                return null !== $v;
+            }
+        );
+
+        return empty(array_diff($this->ORM->getRequiredFields($entity_class), array_keys($properties)));
     }
 
 
@@ -129,7 +129,7 @@ class DefaultUpdate
     protected function replaceIdWithObject(string $entity_class, string $property_name, $value)
     {
         $replacements = $this->getObjectRequiredArray()[$entity_class] ?? [];
-        if (in_array($property_name, $replacements, true) && !is_object($value)) {
+        if (!is_object($value) && in_array($property_name, $replacements, true)) {
             $property_name = $this->ORM->qualifyEntityClassname($property_name);
             $value = $this->ORM->EM->getReference($property_name, $value);
         }
@@ -227,7 +227,7 @@ class DefaultUpdate
      *
      * @return boolean Returns true if $Errors is not empty.
      */
-    public function hasErrors()
+    public function hasErrors(): bool
     {
         return !empty($this->getErrors());
     }
@@ -247,7 +247,7 @@ class DefaultUpdate
 
     protected function getObjectRequiredArray(): array
     {
-        return constant('self::OBJECT_REQUIRED') ?? [];
+        return $this::$object_required ?? [];
     }
 
 

@@ -12,7 +12,7 @@ use Doctrine\Common\Util\Debug;
 class ORM
 {
 
-    public $paths_to_entities = [BASE_DIR . 'src/Entities/'];
+    public $paths_to_entities = [BASE_DIR . '/src/Entities/'];
     private $entity_to_class_mapping;
     private $entity_column_data;
     /* @var ClassMetadata[] $entity_meta_data */
@@ -200,7 +200,7 @@ class ORM
     public function getShortEntityName(string $fqcn)
     {
         $this->setEntityToClassMapping();
-        $short_name = array_search($this->entity_to_class_mapping, $fqcn);
+        $short_name = array_search($fqcn, $this->entity_to_class_mapping, true);
 
         return ($short_name === false ? null : $short_name);
     }
@@ -231,7 +231,6 @@ class ORM
     public function getRequiredFields($class_name)
     {
         $this->setEntityColumnData();
-
 
         $required_fields = array_filter(
             $this->getEntityColumnData($class_name),
