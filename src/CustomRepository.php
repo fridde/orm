@@ -227,17 +227,17 @@ class CustomRepository extends EntityRepository
     public function getIndexFromConstant(string $constant, string $value, string $other_class_name = null)
     {
         if (!empty($other_class_name)) {
-            $class_name = $this->getClassMetadata()->namespace . '\\' . $other_class_name;
+            $class_name = $this->getClassMetadata()->namespace.'\\'.$other_class_name;
         } else {
             $class_name = $this->getClassMetadata()->getName();
         }
         $prefix = '\\'.$class_name.'::';
         $constant_name = $prefix.$constant;
         if (!defined($constant_name)) {
-            $constant_name = $prefix . strtoupper($constant);
+            $constant_name = $prefix.strtoupper($constant);
         }
-        if(!defined($constant_name)){
-            throw new \Exception('The constant "'.$constant_name .'" is not defined.');
+        if (!defined($constant_name)) {
+            throw new \Exception('The constant "'.$constant_name.'" is not defined.');
         }
         $const_array = constant($constant_name);
         $return = array_flip($const_array)[$value] ?? null;
@@ -246,8 +246,6 @@ class CustomRepository extends EntityRepository
         }
 
         return $return;
-
-
     }
 
 }

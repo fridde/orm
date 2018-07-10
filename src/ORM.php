@@ -70,11 +70,7 @@ class ORM
         return $this->EM->getRepository($entity_class);
     }
 
-    public function qualifyEntityClassname(string $class_name): ?string
-    {
-        $this->setEntityToClassMapping();
-        return $this->getEntityToClassMapping($class_name) ?? null;
-    }
+
 
 
     public function find($entity_class, $id)
@@ -197,12 +193,18 @@ class ORM
         );
     }
 
-    public function getShortEntityName(string $fqcn)
+    public function getShortEntityName(string $fqcn): ?string
     {
         $this->setEntityToClassMapping();
         $short_name = array_search($fqcn, $this->entity_to_class_mapping, true);
 
         return ($short_name === false ? null : $short_name);
+    }
+
+    public function qualifyEntityClassname(string $class_name): ?string
+    {
+        $this->setEntityToClassMapping();
+        return $this->getEntityToClassMapping($class_name) ?? null;
     }
 
     public function isNullable($entity_name, $field_name)
