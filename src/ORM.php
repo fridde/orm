@@ -22,8 +22,7 @@ class ORM
     public function __construct(array $db_settings = null, array $orm_settings = null)
     {
         $db_settings = $db_settings ?? (SETTINGS['Connection_Details'] ?? []);
-        $orm_settings = $orm_settings ?? (SETTINGS['ORM'] ?? []);
-
+  
         if (empty($db_settings)) {
             throw new \Exception('No database settings found.');
         }
@@ -78,7 +77,7 @@ class ORM
         return $this->getRepository($entity_class)->find($id);
     }
 
-    public function findBy($entity_class, $criteria = [])
+    public function findBy(string $entity_class, array $criteria = []): array
     {
         return $this->getRepository($entity_class)->findBy($criteria);
     }
@@ -87,10 +86,8 @@ class ORM
     {
         if ($return) {
             return Debug::export($var, false);
-        } else {
-            Debug::dump($var);
-        }
-
+        } 
+        Debug::dump($var);
     }
 
     /**
@@ -98,6 +95,7 @@ class ORM
      * @param int|string $entity_id
      * @param string $property The name of the property that is supposed to be updated
      * @param mixed $value
+	 * @throws ExceptionalException
      */
     public function updateProperty(string $entity_class, $entity_id, string $property, $value)
     {
