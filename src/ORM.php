@@ -46,7 +46,8 @@ class ORM
         
         
         $this->registerDoctrineAnnotations();
-        AnnotationRegistry::registerAutoloadNamespace('Fridde\Annotations', BASE_DIR . '/src');
+        $this->registerCustomAnnotations();
+        //AnnotationRegistry::registerAutoloadNamespace('Fridde\Annotations', BASE_DIR . '/src');
         $this->annotation_reader = new SimpleAnnotationReader();
         $this->annotation_reader->addNamespace('Doctrine\ORM\Mapping');
         $this->annotation_reader->addNamespace('Fridde\Annotations');
@@ -61,11 +62,17 @@ class ORM
         $this->EM = EntityManager::create($db_params, $config, new EventManager());
     }
 
+    private function registerCustomAnnotations(string $dir = null)
+    {
+        $dir = $dir ?? BASE_DIR . '/src/Annotations';
+        AnnotationRegistry::registerFile($dir . '/CustomAnnotations.php');
+    }
+
     private function registerDoctrineAnnotations()
     {
         $rc = new \ReflectionClass(Configuration::class);
         $dir = dirname($rc->getFileName());
-        AnnotationRegistry::registerFile($dir . '/Mapping/Driver/DoctrineAnnotations.php');        
+         AnnotationRegistry::registerFile($dir . '/Mapping/Driver/DoctrineAnnotations.php');
     }
 
     public function save($entity)
