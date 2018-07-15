@@ -2,21 +2,30 @@
 
 namespace Fridde;
 
+use Doctrine\Common\Annotations\AnnotationRegistry;
+use Doctrine\Common\Annotations\CachedReader;
+use Doctrine\Common\Annotations\SimpleAnnotationReader;
 use Doctrine\Common\EventManager;
+use Doctrine\ORM\Configuration;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Doctrine\ORM\Tools\Setup;
 use Doctrine\ORM\EntityManager;
 use Doctrine\Common\Util\Debug;
 
 class ORM
 {
-
     public $paths_to_entities = [BASE_DIR . '/src/Entities/'];
+    /* @var SimpleAnnotationReader $annotation_reader  */
+    private $annotation_reader;
+    /* @var array $entity_to_class_mapping  */
     private $entity_to_class_mapping;
+    /* @var array $entity_column_data  */
     private $entity_column_data;
     /* @var ClassMetadata[] $entity_meta_data */
     private $entity_meta_data;
+    /* @var EntityManager $EM  */
     public $EM;
 
     public function __construct(array $db_settings = null, array $orm_settings = null)
@@ -34,12 +43,29 @@ class ORM
             'dbname' => $db_settings['db_name'],
             'charset' => 'utf8',
         ];
+        
+        
+        $this->registerDoctrineAnnotations();
+        AnnotationRegistry::registerAutoloadNamespace('Fridde\Annotations', BASE_DIR . '/src');
+        $this->annotation_reader = new SimpleAnnotationReader();
+        $this->annotation_reader->addNamespace('Doctrine\ORM\Mapping');
+        $this->annotation_reader->addNamespace('Fridde\Annotations');
+
+        $mapping_driver = new AnnotationDriver($this->annotation_reader, $this->paths_to_entities);
 
         $is_dev_mode = $GLOBALS['debug'] ?? false;
-        $config = Setup::createAnnotationMetadataConfiguration($this->paths_to_entities, $is_dev_mode);
+        $config = Setup::createConfiguration($is_dev_mode);
+        $config->setMetadataDriverImpl($mapping_driver);
         $config->setAutoGenerateProxyClasses(true);
-        $this->EM = EntityManager::create($db_params, $config, new EventManager());
 
+        $this->EM = EntityManager::create($db_params, $config, new EventManager());
+    }
+
+    private function registerDoctrineAnnotations()
+    {
+        $rc = new \ReflectionClass(Configuration::class);
+        $dir = dirname($rc->getFileName());
+        AnnotationRegistry::registerFile($dir . '/Mapping/Driver/DoctrineAnnotations.php');        
     }
 
     public function save($entity)
@@ -137,9 +163,13 @@ class ORM
     /**
      * @return mixed
      */
-    public function getEntityToClassMapping($short_name = null)
+    public function getEntityToClassMapping(string $short_name = null)
     {
-        return $this->entity_to_class_mapping[$short_name] ?? $this->entity_to_class_mapping;
+        if(empty($short_name)){
+            return $this->entity_to_class_mapping;
+        }
+
+        return $this->entity_to_class_mapping[$short_name];
     }
 
     /**
@@ -327,6 +357,12 @@ class ORM
         $this->EM->flush();
     }
 
-
+    /**
+     * @return SimpleAnnotationReader
+     */
+    public function getAnnotationReader(): SimpleAnnotationReader
+    {
+        return $this->annotation_reader;
+    }
 
 }
