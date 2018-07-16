@@ -5,6 +5,8 @@
 
 namespace Fridde;
 
+use Doctrine\ORM\Mapping\ManyToOne;
+use Fridde\Annotations\PostArgs;
 use Fridde\Utility as U;
 use Fridde\Entities\Cookie;
 use Carbon\Carbon;
@@ -32,6 +34,11 @@ class DefaultUpdate
         'createNewEntityFromModel' => ['entity_class', 'property', 'value', 'model_entity_id'],
     ];
 
+    //updateProperty => "entity_class, entity_id, property, value",
+//batchUpdateProperties => "array_of_updates",
+//createNewEntity => "entity_class, properties",
+//createNewEntityFromModel => "entity_class, property, value, model_entity_id",
+
     /**
      * Update constructor.
      * @param array $request_data
@@ -49,6 +56,8 @@ class DefaultUpdate
      * @param int|string $entity_id
      * @param string $property The name of the property that is supposed to be updated
      * @param mixed $value
+     *
+     * @PostArgs("entity_class, entity_id, property, value")
      */
     public function updateProperty(string $entity_class, $entity_id, string $property, $value)
     {
@@ -105,7 +114,7 @@ class DefaultUpdate
                 return null !== $v;
             }
         );
-
+        $entity_class = $this->ORM->qualifyEntityClassname($entity_class);
         return empty(array_diff($this->ORM->getRequiredFields($entity_class), array_keys($properties)));
     }
 
@@ -128,13 +137,16 @@ class DefaultUpdate
 
     protected function replaceIdWithObject(string $entity_class, string $property_name, $value)
     {
-        $replacements = $this->getObjectRequiredArray()[$entity_class] ?? [];
-        if (!is_object($value) && in_array($property_name, $replacements, true)) {
-            $property_name = $this->ORM->qualifyEntityClassname($property_name);
-            $value = $this->ORM->EM->getReference($property_name, $value);
+        if (is_object($value)) {
+            return $value;
         }
+        $entity_class = $this->ORM->qualifyEntityClassname($entity_class);
+        if (!$this->ORM->getAnnotationReader()->hasPropertyAnnotation($entity_class, $property_name, ManyToOne::class)) {
+            return $value;
+        }
+        $property_name = $this->ORM->qualifyEntityClassname($property_name);
 
-        return $value;
+        return $this->ORM->EM->getReference($property_name, $value);
     }
 
     /**
@@ -142,12 +154,18 @@ class DefaultUpdate
      * @return array An array of expected argument names. Returns an empty array if the key
      * was not found in either DEFAULT_METHOD_ARGUMENTS or METHOD_ARGUMENTS
      */
-    public static function getMethodArgs(string $method_name, array $additional_args = [])
+    public function getMethodArgs(string $method_name, array $additional_args = [])
     {
-        $method_args = self::DEFAULT_METHOD_ARGUMENTS + $additional_args;
+        $reader = $this->ORM->getAnnotationReader();
+        $annot = $reader->getAnnotationForMethod(self::class, $method_name, PostArgs::class);
 
-        return $method_args[$method_name] ?? [];
+        if(!empty($annot) && isset($annot->args)){
+            return $annot->args;
+        }
+        return [];
     }
+
+
 
 
     /**
@@ -244,11 +262,5 @@ class DefaultUpdate
     {
         return $this->ORM->getRepository($entity_class)->find($id);
     }
-
-    protected function getObjectRequiredArray(): array
-    {
-        return $this::$object_required ?? [];
-    }
-
 
 }
