@@ -6,6 +6,7 @@
 namespace Fridde;
 
 use Doctrine\ORM\Mapping\ManyToOne;
+use Fridde\Annotations\NeedsSameSchool;
 use Fridde\Annotations\PostArgs;
 use Fridde\Utility as U;
 use Fridde\Entities\Cookie;
@@ -26,19 +27,6 @@ class DefaultUpdate
     /** @var array */
     protected $Errors = [];
 
-    /* @var array */
-    public const DEFAULT_METHOD_ARGUMENTS = [
-        'updateProperty' => ['entity_class', 'entity_id', 'property', 'value'],
-        'batchUpdateProperties' => ['array_of_updates'],
-        'createNewEntity' => ['entity_class', 'properties'],
-        'createNewEntityFromModel' => ['entity_class', 'property', 'value', 'model_entity_id'],
-    ];
-
-    //updateProperty => "entity_class, entity_id, property, value",
-//batchUpdateProperties => "array_of_updates",
-//createNewEntity => "entity_class, properties",
-//createNewEntityFromModel => "entity_class, property, value, model_entity_id",
-
     /**
      * Update constructor.
      * @param array $request_data
@@ -58,6 +46,8 @@ class DefaultUpdate
      * @param mixed $value
      *
      * @PostArgs("entity_class, entity_id, property, value")
+     * @SecurityLevel(Authorizer::ACCESS_ALL_EXCEPT_GUEST)
+     * @NeedsSameSchool
      */
     public function updateProperty(string $entity_class, $entity_id, string $property, $value)
     {
@@ -67,6 +57,13 @@ class DefaultUpdate
         return $this;
     }
 
+    /**
+     * @param array $array_of_updates
+     * @return $this
+     *
+     * @PostArgs("array_of_updates")
+     * @SecurityLevel(Authorizer::ACCESS_ADMIN_ONLY)
+     */
     public function batchUpdateProperties(array $array_of_updates)
     {
         // array of entity_class, entity_id, property, value
@@ -86,6 +83,10 @@ class DefaultUpdate
      * @param array $properties
      * @param bool $flush
      * @return $this
+     *
+     * @PostArgs("entity_class, properties")
+     * @SecurityLevel(Authorizer::ACCESS_ALL_EXCEPT_GUEST)
+     * @NeedsSameSchool
      */
     public function createNewEntity(string $entity_class, array $properties = [], bool $flush = true)
     {
@@ -151,13 +152,12 @@ class DefaultUpdate
 
     /**
      * @param string $method_name
-     * @return array An array of expected argument names. Returns an empty array if the key
-     * was not found in either DEFAULT_METHOD_ARGUMENTS or METHOD_ARGUMENTS
+     * @return array An array of expected argument names defined in PostArgs. 
      */
-    public function getMethodArgs(string $method_name, array $additional_args = [])
+    public function getMethodArgs(string $method_name, array $additional_args = []): array
     {
         $reader = $this->ORM->getAnnotationReader();
-        $annot = $reader->getAnnotationForMethod(self::class, $method_name, PostArgs::class);
+        $annot = $reader->getAnnotationForMethod(get_class($this), $method_name, PostArgs::class);
 
         if(!empty($annot) && isset($annot->args)){
             return $annot->args;
