@@ -44,10 +44,6 @@ class DefaultUpdate
      * @param int|string $entity_id
      * @param string $property The name of the property that is supposed to be updated
      * @param mixed $value
-     *
-     * @PostArgs("entity_class, entity_id, property, value")
-     * @SecurityLevel(Authorizer::ACCESS_ALL_EXCEPT_GUEST)
-     * @NeedsSameSchool
      */
     public function updateProperty(string $entity_class, $entity_id, string $property, $value)
     {
@@ -60,10 +56,7 @@ class DefaultUpdate
     /**
      * @param array $array_of_updates
      * @return $this
-     *
-     * @PostArgs("array_of_updates")
-     * @SecurityLevel(Authorizer::ACCESS_ADMIN_ONLY)
-     */
+	*/
     public function batchUpdateProperties(array $array_of_updates)
     {
         // array of entity_class, entity_id, property, value
@@ -83,10 +76,6 @@ class DefaultUpdate
      * @param array $properties
      * @param bool $flush
      * @return $this
-     *
-     * @PostArgs("entity_class, properties")
-     * @SecurityLevel(Authorizer::ACCESS_ALL_EXCEPT_GUEST)
-     * @NeedsSameSchool
      */
     public function createNewEntity(string $entity_class, array $properties = [], bool $flush = true)
     {
