@@ -176,7 +176,8 @@ class ORM
 
         if (empty($class_name)) {
             return $this->entity_column_data;
-        } elseif (empty($column_name)) {
+        }
+        if (empty($column_name)) {
             return $this->entity_column_data[$class_name];
         }
 
