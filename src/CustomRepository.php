@@ -7,6 +7,12 @@ use Doctrine\Common\Collections\Criteria;
 
 class CustomRepository extends EntityRepository
 {
+    protected $selection = [];
+
+    public function getSelection(): array
+    {
+        return $this->selection;
+    }
 
     /**
      * Wrapper for selectAnd()
