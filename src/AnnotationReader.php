@@ -96,7 +96,7 @@ class AnnotationReader extends SimpleAnnotationReader
         }
 
         foreach ($parts as $part) {
-            $annotations = call_user_func([$this, $reader_function], $part);
+            $annotations = call_user_func(['parent', $reader_function], $part);
             foreach ($annotations as $annot) {
                 $name = $part->getName();
                 $this->annotations[$class_name][$element_type][$name][get_class($annot)] = $annot;
@@ -104,7 +104,25 @@ class AnnotationReader extends SimpleAnnotationReader
         }
     }
 
-    private static function translateElementToFunction(int $element_type, int $class_type)
+    public function getPropertyAnnotation(\ReflectionProperty $property, $annotationName)
+    {
+        $class = $property->getDeclaringClass()->getName();
+        $property_name = $property->getName();
+
+        return $this->getAnnotationForProperty($class, $property_name, $annotationName);
+    }
+
+    public function getPropertyAnnotations(\ReflectionProperty $property)
+    {
+        $class_name = $property->getDeclaringClass()->getName();
+        $property_name = $property->getName();
+
+        $this->setPropertyAnnotationsForClass($class_name);
+
+        return $this->annotations[$class_name][self::_PROPERTY][$property_name] ?? [];
+    }
+
+    private static function translateElementToFunction(int $element_type, int $class_type): string
     {
         $a = self::TYPE_REFLECTION;
         $b = self::TYPE_READER;
