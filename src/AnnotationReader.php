@@ -122,7 +122,7 @@ class AnnotationReader extends SimpleAnnotationReader
         return $this->annotations[$class_name][self::_PROPERTY][$property_name] ?? [];
     }
 
-    private static function translateElementToFunction(int $element_type, int $class_type): string
+    private static function translateElementToFunction(int $element_type, int $class_type): ?string
     {
         $a = self::TYPE_REFLECTION;
         $b = self::TYPE_READER;
