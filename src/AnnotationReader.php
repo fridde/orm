@@ -4,12 +4,16 @@ namespace Fridde;
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Annotations\SimpleAnnotationReader;
+use Doctrine\Common\Cache\Cache;
 use Doctrine\ORM\Configuration;
+use League\Container\Container;
 
 class AnnotationReader extends SimpleAnnotationReader
 {
     /* @var array $annotations */
     private $annotations;
+
+    protected const CACHE_KEY = 'annotations';
 
     public const _CLASS = 0;
     public const _PROPERTY = 1;
@@ -18,6 +22,15 @@ class AnnotationReader extends SimpleAnnotationReader
     private const TYPE_REFLECTION = 0;
     private const TYPE_READER = 1;
 
+
+    public function __construct()
+    {
+        $cache = self::getCache();
+        if(!empty($cache) && $cache->contains(self::CACHE_KEY)){
+            $this->annotations = $cache->fetch(self::CACHE_KEY);
+        }
+        parent::__construct();
+    }
 
     public function registerCustomAnnotations(string $dir = null, string $file_name = 'CustomAnnotations.php'): void
     {
@@ -102,6 +115,10 @@ class AnnotationReader extends SimpleAnnotationReader
                 $this->annotations[$class_name][$element_type][$name][get_class($annot)] = $annot;
             }
         }
+        $cache = self::getCache();
+        if(!empty($cache)){
+            $cache->save(self::CACHE_KEY, $this->annotations);
+        }
     }
 
     public function getPropertyAnnotation(\ReflectionProperty $property, $annotationName)
@@ -134,6 +151,17 @@ class AnnotationReader extends SimpleAnnotationReader
         ];
 
         return $function_translator[$element_type][$class_type];
+    }
+    
+    protected static function getCache(): ?Cache
+    {
+        /* @var Container $container  */
+        $container = $GLOBALS['CONTAINER'];
+        if($container->has('Cache')){
+            return $container->get('Cache');
+        }
+        return null;
+
     }
 
 }
