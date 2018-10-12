@@ -156,8 +156,8 @@ class AnnotationReader extends SimpleAnnotationReader
     protected static function getCache(): ?Cache
     {
         /* @var Container $container  */
-        $container = $GLOBALS['CONTAINER'];
-        if($container->has('Cache')){
+        $container = $GLOBALS['CONTAINER'] ?? null;
+        if(!empty($container) && $container->has('Cache')){
             return $container->get('Cache');
         }
         return null;
