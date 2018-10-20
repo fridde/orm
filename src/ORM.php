@@ -42,7 +42,7 @@ class ORM
             'user' => $db_settings['db_username'],
             'password' => $db_settings['db_password'],
             'dbname' => $db_settings['db_name'],
-            'charset' => 'utf8',
+            'charset' => 'utf8mb4',
         ];
 
 
