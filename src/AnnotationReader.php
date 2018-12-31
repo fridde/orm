@@ -32,18 +32,14 @@ class AnnotationReader extends SimpleAnnotationReader
         parent::__construct();
     }
 
-    public function registerCustomAnnotations(string $dir = null, string $file_name = 'CustomAnnotations.php'): void
-    {
-        $dir = $dir ?? BASE_DIR.'/src/Annotations';
-        AnnotationRegistry::registerFile($dir.'/'.$file_name);
-    }
-
+    /*
     public function registerDoctrineAnnotations(): void
     {
         $rc = new \ReflectionClass(Configuration::class);
         $dir = dirname($rc->getFileName());
         AnnotationRegistry::registerFile($dir.'/Mapping/Driver/DoctrineAnnotations.php');
     }
+    */
 
     public function getAnnotationForProperty(string $class, string $property, string $annotation_name)
     {

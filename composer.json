@@ -15,5 +15,8 @@
     "autoload": {
         "psr-4": { "Fridde\\": "src/" }
     },
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "require-dev": {
+        "symfony/var-dumper": "^4.3@dev"
+    }
 }
