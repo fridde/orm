@@ -3,12 +3,11 @@
 namespace Fridde;
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
-use Doctrine\Common\Annotations\SimpleAnnotationReader;
+use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use Doctrine\Common\Cache\Cache;
-use Doctrine\ORM\Configuration;
 use League\Container\Container;
 
-class AnnotationReader extends SimpleAnnotationReader
+class AnnotationReader extends DoctrineAnnotationReader
 {
     /* @var array $annotations */
     private $annotations;
@@ -25,21 +24,14 @@ class AnnotationReader extends SimpleAnnotationReader
 
     public function __construct()
     {
+        AnnotationRegistry::registerLoader('class_exists');
+
         $cache = self::getCache();
         if(!empty($cache) && $cache->contains(self::CACHE_KEY)){
             $this->annotations = $cache->fetch(self::CACHE_KEY);
         }
         parent::__construct();
     }
-
-    /*
-    public function registerDoctrineAnnotations(): void
-    {
-        $rc = new \ReflectionClass(Configuration::class);
-        $dir = dirname($rc->getFileName());
-        AnnotationRegistry::registerFile($dir.'/Mapping/Driver/DoctrineAnnotations.php');
-    }
-    */
 
     public function getAnnotationForProperty(string $class, string $property, string $annotation_name)
     {

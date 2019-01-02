@@ -49,9 +49,6 @@ class ORM
 
 
         $this->annotation_reader = new AnnotationReader();
-        //$this->annotation_reader->registerDoctrineAnnotations();
-        //$this->annotation_reader->registerCustomAnnotations();
-        //$this->annotation_reader->addNamespace('Doctrine\ORM\Mapping');
 
         $mapping_driver = new AnnotationDriver($this->annotation_reader, $this->paths_to_entities);
 
@@ -160,20 +157,6 @@ class ORM
         return $entity;
     }
 
-    /**
-     * @return mixed
-     */
-    /*
-    public function getEntityToClassMapping(string $short_name = null)
-    {
-        $this->setEntityToClassMapping();
-        if (empty($short_name)) {
-            return $this->entity_to_class_mapping;
-        }
-
-        return $this->entity_to_class_mapping[$short_name];
-    }
-    */
 
     /**
      * @return array
