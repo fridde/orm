@@ -5,7 +5,6 @@ namespace Fridde;
 use Doctrine\Common\Cache\Cache;
 use Doctrine\Common\EventManager;
 use Doctrine\Common\Persistence\ObjectRepository;
-use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
