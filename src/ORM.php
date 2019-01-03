@@ -2,6 +2,8 @@
 
 namespace Fridde;
 
+use Doctrine\Common\Cache\Cache;
+use Doctrine\Common\Cache\CacheProvider;
 use Doctrine\Common\EventManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -28,10 +30,9 @@ class ORM
     /**
      * ORM constructor.
      * @param array|null $db_settings
-     * @param array|null $orm_settings
      * @throws \Exception
      */
-    public function __construct(array $db_settings = null, array $orm_settings = null)
+    public function __construct(array $db_settings = null, Cache $cache = null, string $proxyDir = null)
     {
         $db_settings = $db_settings ?? (SETTINGS['Connection_Details'] ?? []);
 
@@ -53,7 +54,7 @@ class ORM
         $mapping_driver = new AnnotationDriver($this->annotation_reader, $this->paths_to_entities);
 
         $is_dev_mode = $GLOBALS['debug'] ?? false;
-        $config = Setup::createConfiguration($is_dev_mode);
+        $config = Setup::createConfiguration($is_dev_mode, $proxyDir, $cache);
         $config->setMetadataDriverImpl($mapping_driver);
         $config->setAutoGenerateProxyClasses(true);
 
