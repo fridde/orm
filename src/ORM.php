@@ -4,6 +4,7 @@ namespace Fridde;
 
 use Doctrine\Common\Cache\Cache;
 use Doctrine\Common\EventManager;
+use Doctrine\Common\Persistence\ObjectRepository;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
@@ -90,7 +91,7 @@ class ORM
         return $this->EM;
     }
 
-    public function getRepository(string $entity_class): EntityRepository
+    public function getRepository(string $entity_class): ObjectRepository
     {
         $entity_class = $this->qualifyEntityClassname($entity_class);
 
@@ -178,9 +179,6 @@ class ORM
         return $this->entity_column_data[$class_name][$column_name];
     }
 
-    /**
-     * @param mixed $entity_column_data
-     */
     private function setEntityColumnData(): void
     {
         if (!empty($this->entity_column_data)) {
