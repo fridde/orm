@@ -3,7 +3,6 @@
 namespace Fridde;
 
 use Doctrine\Common\Cache\Cache;
-use Doctrine\Common\Cache\CacheProvider;
 use Doctrine\Common\EventManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -30,7 +29,10 @@ class ORM
     /**
      * ORM constructor.
      * @param array|null $db_settings
-     * @throws \Exception
+     * @param Cache|null $cache
+     * @param string|null $proxyDir
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \Doctrine\ORM\ORMException
      */
     public function __construct(array $db_settings = null, Cache $cache = null, string $proxyDir = null)
     {
