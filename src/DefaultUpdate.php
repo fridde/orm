@@ -166,9 +166,9 @@ class DefaultUpdate
      *                     It contains ['onReturn' => '...', 'success' => true|false,
      *                     'errors' => [...]]
      */
-    public function getReturn($key = null)
+    public function getReturn(string $key = null)
     {
-        if (empty($key)) {
+        if ($key === null) {
             $this->setReturn('onReturn', $this->RQ['onReturn'] ?? null);
             $this->setReturn('success', !$this->hasErrors());
             $this->setReturn('errors', $this->getErrors());
@@ -176,7 +176,7 @@ class DefaultUpdate
             return $this->Return;
         }
 
-        return $this->Return[$key];
+        return $this->Return[$key] ?? null;
     }
 
     /**
