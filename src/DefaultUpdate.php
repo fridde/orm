@@ -45,7 +45,7 @@ class DefaultUpdate
      * @return DefaultUpdate
      * @throws \Exception
      */
-    public function updateProperty(string $entity_class, $entity_id, string $property, $value): self
+    public function updateProperty(string $entity_class, $entity_id, string $property, $value)
     {
         $value = $this->replaceIdWithObject($entity_class, $property, $value);
         $this->ORM->updateProperty($entity_class, $entity_id, $property, $value);
@@ -57,7 +57,7 @@ class DefaultUpdate
      * @param array $array_of_updates
      * @return $this
 	*/
-    public function batchUpdateProperties(array $array_of_updates): self
+    public function batchUpdateProperties(array $array_of_updates)
     {
         // array of entity_class, entity_id, property, value
         foreach ($array_of_updates as $update_args) {
@@ -78,7 +78,7 @@ class DefaultUpdate
      * @return $this
      * @throws \Doctrine\ORM\ORMException
      */
-    public function createNewEntity(string $entity_class, array $properties = [], bool $flush = true): self
+    public function createNewEntity(string $entity_class, array $properties = [], bool $flush = true)
     {
 
         if (!$this->allRequiredFieldsGiven($entity_class, $properties)) {
@@ -110,7 +110,7 @@ class DefaultUpdate
     }
 
 
-    public function flush(): self
+    public function flush()
     {
         $this->ORM->EM->flush();
 
@@ -200,7 +200,7 @@ class DefaultUpdate
         return $this;
     }
 
-    public function setReturnFromRequest($keys)
+    public function setReturnFromRequest($keys): void
     {
         if (is_string($keys)) {
             $keys = [$keys];
