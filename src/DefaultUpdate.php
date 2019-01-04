@@ -6,11 +6,9 @@
 namespace Fridde;
 
 use Doctrine\ORM\Mapping\ManyToOne;
-use Fridde\Annotations\NeedsSameSchool;
 use Fridde\Annotations\PostArgs;
 use Fridde\Utility as U;
-use Fridde\Entities\Cookie;
-use Carbon\Carbon;
+
 
 
 /**
@@ -44,8 +42,10 @@ class DefaultUpdate
      * @param int|string $entity_id
      * @param string $property The name of the property that is supposed to be updated
      * @param mixed $value
+     * @return DefaultUpdate
+     * @throws \Exception
      */
-    public function updateProperty(string $entity_class, $entity_id, string $property, $value)
+    public function updateProperty(string $entity_class, $entity_id, string $property, $value): self
     {
         $value = $this->replaceIdWithObject($entity_class, $property, $value);
         $this->ORM->updateProperty($entity_class, $entity_id, $property, $value);
@@ -57,12 +57,12 @@ class DefaultUpdate
      * @param array $array_of_updates
      * @return $this
 	*/
-    public function batchUpdateProperties(array $array_of_updates)
+    public function batchUpdateProperties(array $array_of_updates): self
     {
         // array of entity_class, entity_id, property, value
         foreach ($array_of_updates as $update_args) {
             if (count(array_filter(array_keys($update_args), 'is_string')) > 0) {
-                $update_args = U::pluck($update_args, self::getMethodArgs('updateProperty'));
+                $update_args = U::pluck($update_args, $this->getMethodArgs('updateProperty'));
             }
             call_user_func_array([$this->ORM, 'updateProperty'], array_values($update_args));
         }
@@ -76,8 +76,9 @@ class DefaultUpdate
      * @param array $properties
      * @param bool $flush
      * @return $this
+     * @throws \Doctrine\ORM\ORMException
      */
-    public function createNewEntity(string $entity_class, array $properties = [], bool $flush = true)
+    public function createNewEntity(string $entity_class, array $properties = [], bool $flush = true): self
     {
 
         if (!$this->allRequiredFieldsGiven($entity_class, $properties)) {
@@ -96,7 +97,7 @@ class DefaultUpdate
     }
 
 
-    private function allRequiredFieldsGiven(string $entity_class, array $properties)
+    private function allRequiredFieldsGiven(string $entity_class, array $properties): bool
     {
         $properties = array_filter(
             $properties,
@@ -109,14 +110,14 @@ class DefaultUpdate
     }
 
 
-    public function flush()
+    public function flush(): self
     {
         $this->ORM->EM->flush();
 
         return $this;
     }
 
-    protected function replaceIdsWithObjects(string $entity_class, $properties)
+    protected function replaceIdsWithObjects(string $entity_class, array $properties): array
     {
         foreach ($properties as $property_name => &$value) {
             $value = $this->replaceIdWithObject($entity_class, $property_name, $value);
@@ -143,7 +144,7 @@ class DefaultUpdate
      * @param string $method_name
      * @return array An array of expected argument names defined in PostArgs. 
      */
-    public function getMethodArgs(string $method_name, array $additional_args = []): array
+    public function getMethodArgs(string $method_name): array
     {
         $reader = $this->ORM->getAnnotationReader();
         $annot = $reader->getAnnotationForMethod(get_class($this), $method_name, PostArgs::class);
@@ -214,7 +215,7 @@ class DefaultUpdate
      *
      * @return string[] All error strings as array.
      */
-    public function getErrors()
+    public function getErrors(): array
     {
         return $this->Errors;
     }
@@ -224,7 +225,7 @@ class DefaultUpdate
      *
      * @param string $error_string A string describing the error.
      */
-    public function addError($error_string)
+    public function addError($error_string): void
     {
         $this->Errors[] = $error_string;
     }
@@ -247,9 +248,10 @@ class DefaultUpdate
      * @param  integer|string $id The id of the entity to look for.
      * @return object|null The entity or null if no entity was found.
      */
+    /*
     protected function findById(string $entity_class, $id)
     {
         return $this->ORM->getRepository($entity_class)->find($id);
     }
-
+    */
 }
