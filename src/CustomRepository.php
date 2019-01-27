@@ -7,6 +7,9 @@ use Doctrine\Common\Collections\Criteria;
 
 class CustomRepository extends EntityRepository
 {
+    public const AND = 'and';
+    public const OR = 'or';
+
     protected $selection = [];
 
     public function getSelection(): array
@@ -17,7 +20,7 @@ class CustomRepository extends EntityRepository
     /**
      * Wrapper for selectAnd()
      *
-     * @param $expression_args An array of expression-arguments
+     * @param array $expression_args An array of expression-arguments
      * @return array An array containing the entities that match the criteria
      */
     public function select(...$expression_args): array
@@ -42,19 +45,22 @@ class CustomRepository extends EntityRepository
 
     public function selectAnd(...$expression_args): array
     {
-        return $this->selectAndOr('and', $expression_args);
+        return $this->selectAndOr(self::AND, $expression_args);
     }
 
     public function selectOr(...$expression_args): array
     {
-        return $this->selectAndOr('or', $expression_args);
+        return $this->selectAndOr(self::OR, $expression_args);
     }
 
     /**
      *
      * Don't call this function directly. Use selectOr() and selectAnd() instead.
      *
+     * @param $type
+     * @param array $expression_args
      * @return array An array containing the entities that match the criteria
+     * @throws \Exception
      */
     protected function selectAndOr($type, ...$expression_args): array
     {
@@ -66,9 +72,11 @@ class CustomRepository extends EntityRepository
             return $this->findAll();
         }
         $expressions = $this->getExpressionArray($args);
-        if (count($expressions) === 1) {
+        $ex_count = count($expressions);
+
+        if ($ex_count === 1) {
             $criteria = Criteria::create()->where($expressions[0]);
-        } elseif (count($expressions) > 1) {
+        } elseif ($ex_count > 1) {
             $big_expression = Criteria::expr();
             $big_expression = call_user_func_array([$big_expression, $type], $expressions);
             $criteria = Criteria::create()->where($big_expression);
@@ -89,7 +97,7 @@ class CustomRepository extends EntityRepository
      * @return array|null   The normalized array that only contains arrays containing arguments,
      *                      i.e. [["operatorA", "fieldA", "valueA"], ["operatorB", "fieldB", "valueB"]]
      */
-    protected function normalizeArgs($args)
+    protected function normalizeArgs(array $args): ?array
     {
         $args = array_values($args); // to ensure that we can use numerical indices
 
@@ -97,7 +105,7 @@ class CustomRepository extends EntityRepository
         if (empty($args) || empty($args[0])) {
             return null;
         } // selectAnd([['eq', 'Status', 1], ['neq', 'FirstName', 'Bob']])
-        elseif (count($args) === 1 && array_filter($args[0], 'is_array') === $args[0]) {
+        if (count($args) === 1 && array_filter($args[0], 'is_array') === $args[0]) {
             $args = $args[0];
         } // selectAnd('eq', 'Status', 1)
         elseif (array_filter($args, 'is_array') !== $args) {
@@ -117,9 +125,9 @@ class CustomRepository extends EntityRepository
      * [getExpressionArray description]
      * @param  array $array_of_expression_args An array containing arrays with 2 or 3 elements
      *                                         that conform to the standard [operator, field, value]
-     * @return Doctrine\Common\Collections\Expr\Expression[] An array of expressions
+     * @return Doctrine\Common\Collections\Expr[] An array of expressions
      */
-    protected function getExpressionArray($array_of_expression_args)
+    protected function getExpressionArray($array_of_expression_args): array
     {
         return array_map(
             function ($arg) {
@@ -131,9 +139,9 @@ class CustomRepository extends EntityRepository
                 $value = array_shift($arg);
                 if ($operator === 'isNull') {
                     return Criteria::expr()->isNull($field);
-                } else {
-                    return Criteria::expr()->$operator($field, $value);
                 }
+
+                return Criteria::expr()->$operator($field, $value);
             },
             $array_of_expression_args
         );
@@ -148,17 +156,24 @@ class CustomRepository extends EntityRepository
      *                           to be included in the array
      * @param  array $parameters The parameters to be passed to the callback,
      *                            as described in the docs for call_user_func_array()
+     * @param string $operator
      * @return array             The filtered array of entities
      */
-    public function findViaMethod(string $method_name, $value, array $parameters = [], string $operator = 'eq')
-    {
+    public function findViaMethod(
+        string $method_name,
+        $value,
+        array $parameters = [],
+        string $operator = 'eq'
+    ): array {
         return $this->findViaMultipleMethods([[$method_name, $value, $parameters, $operator]]);
     }
 
-    public function findViaMultipleMethods(array $methods, $total_operator = 'AND')
+    public function findViaMultipleMethods(array $methods, $total_operator = self::AND, $entities = null): array
     {
+        $entities = $entities ?? $this->findAll();
+
         $filtered = [];
-        foreach ($this->findAll() as $entity) {
+        foreach ($entities as $entity) {
             $test_results = [];
             foreach ($methods as $method) {
                 [$method_name, $value] = $method;
@@ -173,10 +188,13 @@ class CustomRepository extends EntityRepository
                 $test_results[] = $this->applyLogicalOperator($operator, $method_result, $value);
             }
             $nr_of_trues = count(array_filter($test_results));
-            $total_operator = strtolower($total_operator);
-            if ($total_operator === 'and' && count($test_results) === $nr_of_trues) {
-                $filtered[] = $entity;
-            } elseif ($total_operator === 'or' && $nr_of_trues > 0) {
+
+            $test_fnc = [
+                self::AND => 'array_product',
+                self::OR => 'array_sum'
+            ];
+
+            if(call_user_func($test_fnc[$total_operator], $test_results)){
                 $filtered[] = $entity;
             }
         }
@@ -193,7 +211,7 @@ class CustomRepository extends EntityRepository
      * @param  mixed $right_value [description]
      * @return boolean              The result of the logical operation
      */
-    public function applyLogicalOperator($operator, $left_value, $right_value)
+    public function applyLogicalOperator(string $operator, $left_value, $right_value): bool
     {
         $l = $left_value;
         $r = $right_value;
