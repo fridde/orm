@@ -17,6 +17,16 @@ class CustomRepository extends EntityRepository
         return $this->selection;
     }
 
+    public function fetch(): array
+    {
+        return $this->selection;
+    }
+
+    public function all()
+    {
+        $this->selection = $this->findAll();
+    }
+
     /**
      * Wrapper for selectAnd()
      *
