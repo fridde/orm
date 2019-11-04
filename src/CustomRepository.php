@@ -25,6 +25,8 @@ class CustomRepository extends EntityRepository
     public function all()
     {
         $this->selection = $this->findAll();
+
+        return $this;
     }
 
     /**
